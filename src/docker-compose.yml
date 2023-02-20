@@ -5,18 +5,19 @@ networks:
     driver: bridge
 
 volumes:
-  volume-kubenews:
-    name: volume-kubenews
+  kubedevnews:
+  pgadmin-data:
 
 services:
-  db:
+
+  postgresql:
     image: postgres:14.5
     container_name: postgresql
     networks:
       - network-kubenews
     restart: always
     volumes:
-      - volume-kubenews:/var/lib/postgresql/data
+      - kubedevnews:/var/lib/postgresql/data
     ports:
       - 5432:5432
     environment:
@@ -34,23 +35,19 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - db
-    environment:
-      DB_DATABASE: kubedevnews
-      DB_USERNAME: kubedevnews
-      DB_PASSWORD: password
-      DB_HOST: db
-
+      - postgresql
 
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
     depends_on:
-      - db
+      - postgresql
     networks:
       - network-kubenews
     ports:
       - 16543:80
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: user@gmail.com
       PGADMIN_DEFAULT_PASSWORD: password
