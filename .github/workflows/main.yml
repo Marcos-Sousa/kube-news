@@ -22,5 +22,5 @@ jobs:
           file: ./src/Dockerfile
           push: true
           tags: |
-            marcossousalima/kube-news-pipeline/v1
-            marcossousalima/kube-news-pipeline/latest
+            marcossousalima/kube-news-pipeline:v${{ github.run_number}}
+            marcossousalima/kube-news-pipeline:latest
