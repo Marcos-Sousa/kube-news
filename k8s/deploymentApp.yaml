@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: kubenews
-        image:  marcossousalima/kube-news:v1
+        image:  marcossousalima/kube-news-pipeline:v1
         ports:
         - containerPort: 8080
         envFrom:
