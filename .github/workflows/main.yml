@@ -40,7 +40,6 @@ jobs:
         uses: Azure/k8s-deploy@v5
         with:
           manifests: |
-            ./k8s/deploymentApp.yaml
-            ./k8s/deploymentDb.yaml
+            ./k8s/deployment.yaml
           images: |
            marcossousalima/kube-news-pipeline:v${{ github.run_number}}
