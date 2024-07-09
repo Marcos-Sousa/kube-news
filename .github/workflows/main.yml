@@ -6,8 +6,8 @@ on:
     
 jobs:
   CI:  
-   runs-on: ubuntu-latest
-   steps:
+    runs-on: ubuntu-latest
+    steps:
       - name: Obtendo código
         uses: actions/checkout@v4.1.5
       - name: autenticação no docker hub 
@@ -24,7 +24,6 @@ jobs:
           push: true
           tags: |
             marcossousalima/kube-news-pipeline:v${{github.run_number}}
-            marcossousalima/kube-news-pipeline:latest
 
   CD:
     runs-on: ubuntu-latest
@@ -65,7 +64,7 @@ jobs:
         run: |
           kubectl rollout restart deployment web
 
-      - name: Debug - Check image
+      - name: List All pods
         run: |
-          kubectl describe deployment web | grep Image
+          kubectl get pods --all-namespaces
 
