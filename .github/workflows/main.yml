@@ -51,3 +51,7 @@ jobs:
       - name: Get GKE credentials
         run: |
           gcloud container clusters get-credentials kube-news --zone us-central1-c --project estudo-devops-428820
+
+      - name: Deploy to GKE
+        run: |
+          kubectl apply -f ./k8s/deployment.yaml   
