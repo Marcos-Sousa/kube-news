@@ -15,6 +15,7 @@ jobs:
         with:
           username: ${{secrets.USERNAME}}
           password: ${{secrets.TOKEN}}
+
       - name: build da imagem
         uses: docker/build-push-action@v5.3.0
         with:
@@ -52,11 +53,19 @@ jobs:
         run: |
           gcloud container clusters get-credentials kube-news --zone us-central1-c --project estudo-devops-428820
 
+      - name: Update deployment image
+        run: |
+          sed -i 's|image: marcossousalima/kube-news-pipeline:latest|image: marcossousalima/kube-news-pipeline:v${{github.run_number}}|g' ./k8s/deployment.yaml
+
       - name: Deploy to GKE
         run: |
-          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f ./k8s/deployment.yaml
 
       - name: Force restart pods
         run: |
           kubectl rollout restart deployment web
+
+      - name: Debug - Check image
+        run: |
+          kubectl describe deployment web | grep Image
 
