@@ -52,14 +52,7 @@ jobs:
         run: |
           gcloud container clusters get-credentials kube-news --zone us-central1-c --project estudo-devops-428820
 
-      - name: Add unique annotation
-        run: |
-          kubectl patch deployment web -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"timestamp\":\"$(date +'%s')\"}}}}}"
-
       - name: Deploy to GKE
         run: |
           kubectl apply -f k8s/deployment.yaml
-
-      - name: Force restart pods
-        run: kubectl delete pods -l app=web
 
