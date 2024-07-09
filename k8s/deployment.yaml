@@ -53,14 +53,13 @@ spec:
       labels:
         app: web
       annotations:
-        update-timestamp: "{{ github.run_number }}"  # Adicione uma anotação única
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
         prometheus.io/path: "/metrics"
     spec:
       containers:
         - name: web
-          image: marcossousalima/kube-news-pipeline:v${{github.run_number}}
+          image: marcossousalima/kube-news-pipeline:latest
           imagePullPolicy: Always
           ports:
           - containerPort: 8080
