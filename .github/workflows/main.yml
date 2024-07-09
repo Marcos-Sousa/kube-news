@@ -55,3 +55,6 @@ jobs:
       - name: Deploy to GKE
         run: kubectl apply -f ./k8s/deployment.yaml
 
+      - name: Restart Web
+        run: kubectl rollout restart deployment web
+
