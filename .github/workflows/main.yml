@@ -56,3 +56,7 @@ jobs:
         run: |
           kubectl apply -f k8s/deployment.yaml
 
+      - name: Force restart pods
+        run: |
+          kubectl rollout restart deployment web
+
