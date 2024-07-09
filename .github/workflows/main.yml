@@ -29,18 +29,28 @@ jobs:
     runs-on: ubuntu-latest
     needs: CI
     steps:
-      - name: Obtendo codigo v3
-        uses: actions/checkout@v4.1.5
-      - name: Configuração de contextodo kubernetes
-        uses: azure/k8s-set-context@v4.0.0
+      - name: Checkout code
+        uses: actions/checkout@v3.1.0
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
         with:
-          method: kubeconfig
-          kubeconfig: ${{ secrets.K8S }} 
-      - name: Execucao do manifesto
-        uses: Azure/k8s-deploy@v5
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
         with:
-          manifests: |
-            ./k8s/deploymentApp.yaml
-            ./k8s/deploymentDb.yaml
-          images: |
-           marcossousalima/kube-news-pipeline:v${{ github.run_number}}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Install kubectl and gke-gcloud-auth-plugin
+        run: |
+          gcloud components install kubectl
+          gcloud components install gke-gcloud-auth-plugin
+          echo 'export USE_GKE_GCLOUD_AUTH_PLUGIN=True' >> $GITHUB_ENV
+
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials kube-news --zone us-central1-c --project estudo-devops-428820
+
+      - name: Deploy to GKE
+        run: kubectl apply -f k8s/deployment.yaml
