@@ -1,60 +1,85 @@
-name: CI-CD
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgre
+spec:
+  selector:
+    matchLabels:
+      app: postgre
+  template:
+    metadata:
+      labels:
+        app: postgre
+    spec:
+      containers:
+        - name: postgre
+          image: postgres:15.0
+          ports:
+          - containerPort: 5432
+          env:
+          - name: POSTGRES_DB
+            value: "kubenews"
+          - name: POSTGRES_USER
+            value: "kubenews"
+          - name: POSTGRES_PASSWORD
+            value: "Pg#123"  
 
-on: 
-  push:
-    branches: ["main"]
-    
-jobs:
-  CI:  
-    runs-on: ubuntu-latest
-    steps:
-      - name: Obtendo código
-        uses: actions/checkout@v4.1.5
-      
-      - name: autenticação no docker hub 
-        uses: docker/login-action@v3.1.0
-        with:
-          username: ${{secrets.USERNAME}}
-          password: ${{secrets.TOKEN}}
-      
-      - name: build da imagem
-        uses: docker/build-push-action@v5.3.0
-        with:
-          context: ./src
-          file: ./src/Dockerfile
-          push: true
-          tags: |
-            marcossousalima/kube-news-pipeline:v${{github.run_number}}
-            marcossousalima/kube-news-pipeline:latest
+---
 
-  CD:
-    runs-on: ubuntu-latest
-    needs: CI
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3.1.0
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgre
+spec:
+  selector: 
+    app: postgre
+  ports:
+    - port: 5432
+  type: ClusterIP
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{secrets.GCP_SA_KEY}}
+---
 
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          project_id: ${{secrets.GCP_PROJECT_ID}}
-
-      - name: Install kubectl and gke-gcloud-auth-plugin
-        run: |
-          gcloud components install kubectl
-          gcloud components install gke-gcloud-auth-plugin
-          echo 'export USE_GKE_GCLOUD_AUTH_PLUGIN=True' >> $GITHUB_ENV
-
-      - name: Get GKE credentials
-        run: |
-          gcloud container clusters get-credentials kube-news --zone us-central1-c --project estudo-devops-428820
-
-      - name: Deploy to GKE
-        run: |
-          context: ./k8s
-          kubectl apply -f ./k8s/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: web
+          image: marcossousalima/kube-news-pipeline
+          ports:
+          - containerPort: 8080
+          env:
+          - name: DB_DATABASE
+            value: "kubenews"
+          - name: DB_USERNAME
+            value: "kubenews"
+          - name: DB_PASSWORD
+            value: "Pg#123" 
+          - name: DB_HOST
+            value: "postgre"  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+spec:
+  selector: 
+    app: web
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: LoadBalancer
