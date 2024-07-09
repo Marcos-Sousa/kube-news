@@ -44,7 +44,7 @@ kind: Deployment
 metadata:
   name: web
 spec:
-  replicas: 5
+  replicas: 10
   selector:
     matchLabels:
       app: web
@@ -53,25 +53,23 @@ spec:
       labels:
         app: web
       annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8080"
-        prometheus.io/path: "/metrics"
+        update-timestamp: "{{ timestamp }}"  # Adicione uma anotação única
     spec:
       containers:
         - name: web
-          image: marcossousalima/kube-news-pipeline
-          imagePullPolicy: Always
+          image: marcossousalima/kube-news-pipeline:latest
+          imagePullPolicy: Always  # Certifique-se de que a política de pull está configurada como Always
           ports:
-          - containerPort: 8080
+            - containerPort: 8080
           env:
-          - name: DB_DATABASE
-            value: "kubenews"
-          - name: DB_USERNAME
-            value: "kubenews"
-          - name: DB_PASSWORD
-            value: "Pg#123" 
-          - name: DB_HOST
-            value: "postgre"  
+            - name: DB_DATABASE
+              value: "kubenews"
+            - name: DB_USERNAME
+              value: "kubenews"
+            - name: DB_PASSWORD
+              value: "Pg#123"
+            - name: DB_HOST
+              value: "postgre"  
 ---
 apiVersion: v1
 kind: Service
