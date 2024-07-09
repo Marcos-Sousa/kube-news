@@ -59,7 +59,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: marcossousalima/kube-news-pipeline:v55
+          image: marcossousalima/kube-news-pipeline
           imagePullPolicy: Always
           ports:
           - containerPort: 8080
