@@ -49,10 +49,11 @@ jobs:
           echo 'export USE_GKE_GCLOUD_AUTH_PLUGIN=True' >> $GITHUB_ENV
 
       - name: Get GKE credentials
-    
-        run: kubectl apply -f ./k8s/deployment.yaml 
-        
-      - name: Deploy to GKE
         run: |
           gcloud container clusters get-credentials kube-news --zone us-central1-c --project estudo-devops-428820
+
+      - name: Deploy to GKE
+        run: |
+          context: ./k8s
+          kubectl apply -f ./k8s/deployment.yaml
 
